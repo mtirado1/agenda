@@ -14,7 +14,7 @@ var ErrInvalidRange = errors.New("Invalid time range.")
 var (
 	listPattern = regexp.MustCompile(`^[*\-+]\s+`)
 	datePattern = regexp.MustCompile(`^#+\s*(\d{4}-\d\d-\d\d)`)
-	timePattern = regexp.MustCompile(`^(\d\d:\d\d)(\s*-\s*(\d\d:\d\d)|)`)
+	timePattern = regexp.MustCompile(`^(\d\d?:\d\d)(\s*-\s*(\d\d?:\d\d)|)`)
 )
 
 type Task struct {
