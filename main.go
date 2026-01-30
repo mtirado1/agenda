@@ -6,14 +6,16 @@ import (
 	"slices"
 	"strings"
 	"time"
+
+	"github.com/charmbracelet/lipgloss"
 )
 
-
+var boldStyle = lipgloss.NewStyle().Bold(true)
 
 func main() {
 	tasks := []Task{}
 
-	for i := 1; i < len(os.Args); i+= 1 {
+	for i := 1; i < len(os.Args); i += 1 {
 		filename := os.Args[i]
 		data, err := os.ReadFile(filename)
 
@@ -52,7 +54,7 @@ func main() {
 	}
 
 	if len(todayTasks) > 0 {
-		fmt.Println("Today:")
+		fmt.Println(boldStyle.Render("Today:"))
 		for _, task := range todayTasks {
 			fmt.Printf("%s%s\n", strings.Repeat(" ", 14), task.ShortString())
 		}
@@ -62,7 +64,7 @@ func main() {
 	fmt.Println()
 
 	if len(tomorrowTasks) > 0 {
-		fmt.Println("Tomorrow:")
+		fmt.Println(boldStyle.Render("Tomorrow:"))
 		for _, task := range tomorrowTasks {
 			fmt.Printf("%s%s\n", strings.Repeat(" ", 14), task.ShortString())
 		}
@@ -72,7 +74,7 @@ func main() {
 	fmt.Println()
 
 	if len(upcomingTasks) > 0 {
-		fmt.Println("Upcoming:")
+		fmt.Println(boldStyle.Render("Upcoming:"))
 		for _, task := range upcomingTasks {
 			fmt.Printf("  %s\n", task)
 		}

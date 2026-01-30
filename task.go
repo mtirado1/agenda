@@ -2,8 +2,8 @@ package main
 
 import (
 	"errors"
-	"regexp"
 	"fmt"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -11,8 +11,7 @@ import (
 var ErrInvalidRange = errors.New("Invalid time range.")
 
 var (
-	listPattern = regexp.MustCompile(`^[*\-+]\s+`)
-	datePattern = regexp.MustCompile(`^#+\s*(\d{4}-\d\d-\d\d)`)
+	datePattern = regexp.MustCompile(`^[*\-+]\s+(\d{4}-\d\d-\d\d)\s+`)
 	timePattern = regexp.MustCompile(`^(\d\d?:\d\d)(\s*-\s*(\d\d?:\d\d)|)`)
 )
 
@@ -61,25 +60,18 @@ func daysDifference(now time.Time, task Task) int {
 
 func ParseTasks(text string) ([]Task, error) {
 	lines := strings.Split(text, "\n")
-	var currentDate *time.Time
 	tasks := []Task{}
 
 	for i, line := range lines {
-		line = listPattern.ReplaceAllString(line, "")
+		task := Task{}
+
 		if match := datePattern.FindStringSubmatch(line); match != nil {
 			date, err := time.Parse("2006-01-02", match[1])
-			if err == nil {
-				currentDate = &date
+			if err != nil {
 				continue
 			}
-		}
-
-		if currentDate == nil {
-			continue
-		}
-
-		task := Task{
-			date: *currentDate,
+			task.date = date
+			line = line[len(match[0]):]
 		}
 
 		if match := timePattern.FindStringSubmatch(line); match != nil {
@@ -89,7 +81,7 @@ func ParseTasks(text string) ([]Task, error) {
 			}
 
 			task.hasStartTime = true
-			task.date = time.Date(currentDate.Year(), currentDate.Month(), currentDate.Day(), t.Hour(), t.Minute(), 0, 0, time.UTC)
+			task.date = time.Date(task.date.Year(), task.date.Month(), task.date.Day(), t.Hour(), t.Minute(), 0, 0, time.UTC)
 			duration, err := getDurationFromTimeRange(match[1], match[3])
 			if err == nil {
 				task.duration = &duration
