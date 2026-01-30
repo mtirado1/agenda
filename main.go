@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"strings"
 	"time"
 )
@@ -10,22 +11,30 @@ import (
 
 
 func main() {
-	if len(os.Args) < 2 {
-		fmt.Println("No filename provided.")
-		os.Exit(1)
+	tasks := []Task{}
+
+	for i := 1; i < len(os.Args); i+= 1 {
+		filename := os.Args[i]
+		data, err := os.ReadFile(filename)
+
+		if err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
+		text := string(data)
+
+		fileTasks, err := ParseTasks(text)
+		if err != nil {
+			fmt.Println(fmt.Errorf("%s - %w", filename, err))
+		} else {
+			tasks = append(tasks, fileTasks...)
+		}
 	}
 
-	filename := os.Args[1]
-	data, err := os.ReadFile(filename)
-
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	text := string(data)
-
-	tasks := ParseTasks(text)
+	slices.SortFunc(tasks, func(a, b Task) int {
+		return a.date.Compare(b.date)
+	})
 
 	todayTasks := []Task{}
 	tomorrowTasks := []Task{}

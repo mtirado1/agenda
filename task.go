@@ -4,7 +4,6 @@ import (
 	"errors"
 	"regexp"
 	"fmt"
-	"slices"
 	"strings"
 	"time"
 )
@@ -60,7 +59,7 @@ func daysDifference(now time.Time, task Task) int {
 	return int(delta.Hours()) / 24
 }
 
-func ParseTasks(text string) []Task {
+func ParseTasks(text string) ([]Task, error) {
 	lines := strings.Split(text, "\n")
 	var currentDate *time.Time
 	tasks := []Task{}
@@ -86,8 +85,7 @@ func ParseTasks(text string) []Task {
 		if match := timePattern.FindStringSubmatch(line); match != nil {
 			t, err := time.Parse("15:04", match[1])
 			if err != nil {
-				fmt.Println(fmt.Errorf("Line %d: %w", i+1, err))
-				continue
+				return nil, fmt.Errorf("Line %d: %w", i+1, err)
 			}
 
 			task.hasStartTime = true
@@ -96,7 +94,7 @@ func ParseTasks(text string) []Task {
 			if err == nil {
 				task.duration = &duration
 			} else if !errors.Is(err, ErrInvalidRange) {
-				fmt.Println(fmt.Errorf("Line %d: %w", i+1, err))
+				return nil, fmt.Errorf("Line %d: %w", i+1, err)
 			}
 			line = line[len(match[0]):]
 		}
@@ -107,8 +105,5 @@ func ParseTasks(text string) []Task {
 		}
 	}
 
-	slices.SortFunc(tasks, func(a, b Task) int {
-		return a.date.Compare(b.date)
-	})
-	return tasks
+	return tasks, nil
 }
