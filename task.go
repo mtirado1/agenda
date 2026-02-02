@@ -18,7 +18,7 @@ var (
 type Task struct {
 	date         time.Time
 	hasStartTime bool
-	duration     *time.Duration
+	duration     time.Duration
 	description  string
 }
 
@@ -27,8 +27,8 @@ func (t Task) String() string {
 }
 
 func (t Task) ShortString() string {
-	if t.duration != nil {
-		return fmt.Sprintf("%s-%s  %s", t.date.Format("15:04"), t.date.Add(*t.duration).Format("15:04"), t.description)
+	if t.duration > 0*time.Minute {
+		return fmt.Sprintf("%s-%s  %s", t.date.Format("15:04"), t.date.Add(t.duration).Format("15:04"), t.description)
 	} else if !t.hasStartTime {
 		return strings.Repeat(" ", 13) + t.description
 	}
@@ -86,7 +86,7 @@ func ParseTasks(text string) ([]Task, error) {
 			task.date = time.Date(task.date.Year(), task.date.Month(), task.date.Day(), t.Hour(), t.Minute(), 0, 0, time.UTC)
 			duration, err := getDurationFromTimeRange(match[1], match[3])
 			if err == nil {
-				task.duration = &duration
+				task.duration = duration
 			} else if !errors.Is(err, ErrInvalidRange) {
 				return nil, fmt.Errorf("Line %d: %w", i+1, err)
 			}
