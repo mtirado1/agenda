@@ -72,6 +72,8 @@ func ParseTasks(text string) ([]Task, error) {
 			}
 			task.date = date
 			line = line[len(match[0]):]
+		} else {
+			continue
 		}
 
 		if match := timePattern.FindStringSubmatch(line); match != nil {
